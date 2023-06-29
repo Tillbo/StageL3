@@ -4,7 +4,6 @@ from torch_geometric.data import Data
 from torch_geometric.utils import to_networkx
 from networkx import is_connected, draw_kamada_kawai, connected_components
 from ot import unif
-import matplotlib.pyplot as plt
 
 from .transform import transform
 from .utils import make_p_dist

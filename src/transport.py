@@ -2,6 +2,8 @@ from copy import deepcopy
 from random import random, choice
 from ot.gromov import fused_gromov_wasserstein2
 
+from multiprocessing import Process, Lock, Value, Array
+
 import numpy as np
 
 def node_dists(G1, G2, d):
@@ -79,3 +81,48 @@ def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=1000):
         print("\r\b\r")
     print()
     return D
+
+def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=1000, Nprocess=5):
+    D = Array('d', len(class1)*len(class2))
+    i = Value('i', 0)
+    j = Value('i', 0)
+    coordinates_lock = Lock()
+
+    def f(k, D, i, j):
+        while i.value < len(class1):
+            coordinates_lock.acquire()
+            i0 = i.value
+            j0 = j.value
+            j.value += 1
+            if j.value >= len(class2):
+                j.value = 0
+                i.value += 1
+            coordinates_lock.release()
+
+            """             if i0 >= len(class1):
+                break """
+
+            print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}", end="\r")
+
+            G1 = class1[i0]
+            G2 = class2[j0]
+            C1 = Cs1[i0]
+            C2 = Cs2[j0]
+            h1 = hs1[i0]
+            h2 = hs2[j0]
+            M = node_dists(G1, G2, d)
+            D[i0*len(class2)+j0] = fgw(C1, C2, M, h1, h2, alpha, 1000, verbose=False)
+
+    processes = []
+    for k in range(Nprocess):
+        p = Process(target=f, args=(k, D, i, j))
+        processes.append(p)
+
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
+
+    D = np.array(D).reshape((len(class1), len(class2)))
+    return D
+        

@@ -3,7 +3,7 @@ from .const import *
 from .draw import plot
 from .graph import mean_structure, all_to_all
 from .transform import transform
-from .transport import one_one_fgw
+from .transport import one_one_fgw, one_one_parralelised
 from .utils import *
 from .clustering import cluster_dist, cluster_num
 
