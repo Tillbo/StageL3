@@ -9,6 +9,18 @@ from .transform import transform
 from .utils import make_p_dist
 
 def parse(name="graphs_for_P34972"):
+    """
+    Parse a dataset
+    Must be stored in ./save/[name]
+
+    Must have pandas DataFile format
+
+    Args :
+        - name (string) : name of the dataset
+
+    Output :
+        - classes (list of lists) : list of all classes from the dataset.
+    """
     with open(f"./data/{name}.pkl", "rb") as file:
         df = pickle.load(file)
 
@@ -39,6 +51,21 @@ def parse(name="graphs_for_P34972"):
     return classes
 
 def parse_and_transform(name="graphs_for_P34972", pdv=2, pde=2, beta=0.5, Nmax=-1):
+    """
+    Does the same as parse but pretransforms the graphs.
+
+    Args :
+        - name (str) : name
+        - pdv (float, must be > 1, optionnal (default : 2)) : arg p for the p-distance used for labels.
+        - pde (float, must be > 1, optionnal (default : 2)) : arg p for the p-distance used for edges.
+        - beta (float, must be between 0 and 1) : arg for the transformation
+        - Nmax (int) : max number of elements to put in a same class. -1 means every element.
+    
+    Output :
+        - new_graphs (list of lists of nx.Graph) : list of graphs grouped by classe
+        - new_histos (list of list of histograms) : list of histograms grouped by classes. new_histos[c][i] correspond to new_graph[c][i]
+        - d : new distance function
+    """
     classes = parse(name)
     new_graphs = []
     new_histos = []

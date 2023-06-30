@@ -78,7 +78,7 @@ def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=1000):
             h2 = hs2[j]
             M = node_dists(G1, G2, d)
             D[i, j] = fgw(C1, C2, M, h1, h2, alpha, Niter, text=f"i : {i+1}/{len(class1)} ------ j : {j+1}/{len(class2)} => ")
-        print("\r\b\r")
+        print("\r")
     print()
     return D
 
@@ -88,7 +88,7 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
     j = Value('i', 0)
     coordinates_lock = Lock()
 
-    def f(k, D, i, j):
+    def f(D, i, j):
         while i.value < len(class1):
             coordinates_lock.acquire()
             i0 = i.value
@@ -99,9 +99,6 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
                 i.value += 1
             coordinates_lock.release()
 
-            """             if i0 >= len(class1):
-                break """
-
             print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}", end="\r")
 
             G1 = class1[i0]
@@ -111,11 +108,11 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
             h1 = hs1[i0]
             h2 = hs2[j0]
             M = node_dists(G1, G2, d)
-            D[i0*len(class2)+j0] = fgw(C1, C2, M, h1, h2, alpha, 1000, verbose=False)
+            D[i0*len(class2)+j0] = fgw(C1, C2, M, h1, h2, alpha, Niter, verbose=False)
 
     processes = []
-    for k in range(Nprocess):
-        p = Process(target=f, args=(k, D, i, j))
+    for _ in range(Nprocess):
+        p = Process(target=f, args=(D, i, j))
         processes.append(p)
 
     for p in processes:

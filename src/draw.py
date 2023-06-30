@@ -1,10 +1,16 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def plot(G, mapv, mape=None, title="", n=1, m=1, i=1) -> None:
+def plot(G, mapv, mape=None, title="", n=1, m=1, i=1):
     """
     Plot the graph with the kamanda_kawai layout
-    Labels must be integers
+
+    Args :
+        - G (networkx.Graph()) : Graph to plot
+        - mapv (dict, list) : map between labels of nodes and colors
+        - mape (dict, list, optionnal (default : None)) : map between labels of edges and width. If None, then edge with is 3
+        - title (string) : title
+        - n, m, i (ints) : parameters for subplot
     """
     plt.subplot(n, m, i)
     plt.title(title)

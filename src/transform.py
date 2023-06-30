@@ -61,6 +61,22 @@ def transform(G : nx.Graph(), dv, de, hv, he, beta) :
 def inverse_transform(G : nx.Graph(), d, h):
     """
     Process the inverse tranformation, from a node-only labeled graph to a node+edge labeled graph
+
+    Args :
+        - G (nx.Graph()) : transformed graph
+        - d : distance function between nodes in the graph
+        - h : histogram of the graph
+    
+    Output :
+        - H (nx.Graph()) : untransformed graph
+        - dv : distance on nodes
+        - de : distance on edges
+        - hv : histogram on nodes
+        - he : histogram on edges
+        - beta : beta coefficient used for the transformation
+    
+    WARNING : 
+        Nothing is testes to know if the graph is really a transformed graph. The behaviour of this function on non transformed graphs is not guaranted.
     """
     def dv(a, b):
         return d((a, RESERVED), (b, RESERVED))
