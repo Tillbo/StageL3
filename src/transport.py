@@ -45,7 +45,7 @@ def greedy_random_transport_plan(p, q, e=1e-10):
 
     return T
 
-def fgw(C1, C2, M, h1, h2, alpha=0.5, Niter=5000, verbose=True, text=""):
+def fgw(C1, C2, M, h1, h2, alpha=0.5, Niter=100, verbose=True, text=""):
 
     def printv(*args, **kwargs):
         if verbose:
@@ -64,10 +64,9 @@ def fgw(C1, C2, M, h1, h2, alpha=0.5, Niter=5000, verbose=True, text=""):
             continue
         if (f < min_dist or min_dist < 0) and f >= 0:
             min_dist = f
-    #printv(f"FGW computation completed                                                                          ")
     return min_dist
 
-def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=1000):
+def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100):
     D = np.zeros((len(class1), len(class2)))
     for i, G1 in enumerate(class1):
         for j, G2 in enumerate(class2):
@@ -82,7 +81,7 @@ def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=1000):
     print()
     return D
 
-def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=1000, Nprocess=5):
+def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100, Nprocess=5):
     D = Array('d', len(class1)*len(class2))
     i = Value('i', 0)
     j = Value('i', 0)
