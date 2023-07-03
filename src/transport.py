@@ -81,7 +81,7 @@ def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100):
     print()
     return D
 
-def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100, Nprocess=5):
+def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100, Nprocess=7):
     D = Array('d', len(class1)*len(class2))
     i = Value('i', 0)
     j = Value('i', 0)
@@ -98,7 +98,7 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
                 i.value += 1
             coordinates_lock.release()
 
-            print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}", end="\r")
+            print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}              ", end="\r")
 
             G1 = class1[i0]
             G2 = class2[j0]
