@@ -1,7 +1,7 @@
 from src import *
 
 D01 = np.load("./save/D01.npy")
-D02 = np.load("./save/D12.npy")
+D02 = np.load("./save/D02.npy")
 D12 = np.load("./save/D12.npy")
 
 Counter01 = np.argmin(D01, axis=1)

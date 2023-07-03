@@ -87,6 +87,8 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
     j = Value('i', 0)
     coordinates_lock = Lock()
 
+    symetric = class1 == class2 and Cs1 == Cs2 and hs1 == hs2
+
     def f(D, i, j):
         while i.value < len(class1):
             coordinates_lock.acquire()
@@ -94,8 +96,8 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
             j0 = j.value
             j.value += 1
             if j.value >= len(class2):
-                j.value = 0
                 i.value += 1
+                j.value = i.value if symetric else 0
             coordinates_lock.release()
 
             print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}              ", end="\r")
@@ -107,7 +109,10 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
             h1 = hs1[i0]
             h2 = hs2[j0]
             M = node_dists(G1, G2, d)
-            D[i0*len(class2)+j0] = fgw(C1, C2, M, h1, h2, alpha, Niter, verbose=False)
+            f = fgw(C1, C2, M, h1, h2, alpha, Niter, verbose=False)
+            D[i0*len(class2)+j0] = f
+            if symetric:
+                D[j0*len(class2)+i0] = f
 
     processes = []
     for _ in range(Nprocess):
