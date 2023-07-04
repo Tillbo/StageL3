@@ -26,16 +26,16 @@ np.save("./save/D02.npy", D01)
 
 print("\n====== COMPUTING D12 ======\n")
 D12 = one_one_parralelised(graphs[1], graphs[2], d, C1 , C2, histos[1], histos[2], alpha=0.5, Nprocess=NPROCESS)
-np.save("./save/D12.npy", D12) """
+np.save("./save/D12.npy", D12)
 
 print("\n====== COMPUTING D00 ======\n")
 D00 = one_one_parralelised(graphs[0], graphs[0], d, C0 , C0, histos[0], histos[0], alpha=0.5, Nprocess=NPROCESS)
-np.save("./save/D00.npy", D00)
+np.save("./save/D00.npy", D00) """
 
-""" print("\n====== COMPUTING D11 ======\n")
+print("\n====== COMPUTING D11 ======\n")
 D11 = one_one_parralelised(graphs[1], graphs[1], d, C1, C1, histos[1], histos[1], alpha=0.5, Nprocess=NPROCESS)
 np.save("./save/D11.npy", D11)
 
-print("\n====== COMPUTING D22 ======\n")
+""" print("\n====== COMPUTING D22 ======\n")
 D22 = one_one_parralelised(graphs[2], graphs[2], d, C2, C2, histos[2], histos[2], alpha=0.5, Nprocess=NPROCESS)
 np.save("./save/D22.npy", D22) """
