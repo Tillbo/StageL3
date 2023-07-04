@@ -1,7 +1,7 @@
 from src import *
 
 NMAX = -1
-NPROCESS = 5
+NPROCESS = 19
 
 print("\n====== PARSING DATASET ======\n")
 graphs, histos, d = parse_and_transform(Nmax=NMAX)
