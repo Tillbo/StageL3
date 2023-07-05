@@ -4,26 +4,16 @@ from torch_geometric.data import Data
 from torch_geometric.utils import to_networkx
 from networkx import is_connected, draw_kamada_kawai, connected_components
 from ot import unif
+from numpy.random import choice
+import numpy as np
 
 from .transform import transform
 from .utils import make_p_dist
 
-def parse(name="graphs_for_P34972"):
-    """
-    Parse a dataset
-    Must be stored in ./save/[name]
-
-    Must have pandas DataFile format
-
-    Args :
-        - name (string) : name of the dataset
-
-    Output :
-        - classes (list of lists) : list of all classes from the dataset.
-    """
+def parse(name="graphs_for_P34972", percent=1):
     with open(f"./data/{name}.pkl", "rb") as file:
         df = pickle.load(file)
-
+    
     classes = [[]]
     i_class = 0
     for i, l in enumerate(df.values):
@@ -39,7 +29,7 @@ def parse(name="graphs_for_P34972"):
         if not is_connected(G):
             print(f"Graph {df.index[i]} is not connected")
             largest_cc = max(connected_components(G), key=len)
-            G = G.subgraph(largest_cc).copy()
+            G = G.subgraph(largest_cc)#.copy()
             """ draw_kamada_kawai(G)
             plt.show() """
 
@@ -48,9 +38,11 @@ def parse(name="graphs_for_P34972"):
             i_class += 1
         classes[label].append(G)
     
-    return classes
+    sampled_classes = [choice(np.array(c, dtype=type(classes[0][0])), (int(len(c)*percent),), replace=False) for c in classes]
+    
+    return sampled_classes
 
-def parse_and_transform(name="graphs_for_P34972", pdv=2, pde=2, beta=0.5, Nmax=-1):
+def parse_and_transform(name="graphs_for_P34972", pdv=2, pde=2, beta=0.5, Nmax=-1, percent=1):
     """
     Does the same as parse but pretransforms the graphs.
 
@@ -66,7 +58,7 @@ def parse_and_transform(name="graphs_for_P34972", pdv=2, pde=2, beta=0.5, Nmax=-
         - new_histos (list of list of histograms) : list of histograms grouped by classes. new_histos[c][i] correspond to new_graph[c][i]
         - d : new distance function
     """
-    classes = parse(name)
+    classes = parse(name, percent)
     new_graphs = []
     new_histos = []
     for c in classes:
