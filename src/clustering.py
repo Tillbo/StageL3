@@ -1,4 +1,16 @@
-from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering, DBSCAN
+
+def clusters_from_labels(c, labels):
+    clusters = [[]]
+    i_clust = 0
+
+    for i, G in enumerate(c):
+        while i_clust < labels[i]:
+            i_clust += 1
+            clusters.append([])
+        clusters[labels[i]].append(G)
+    
+    return clusters
 
 def cluster_num(c, D, N=2):
     """
@@ -36,14 +48,9 @@ def cluster_dist(c, D, d):
     AggCluster = AgglomerativeClustering(None, metric='precomputed', linkage='average', distance_threshold=d, compute_full_tree=True)
     cluster_labels = AggCluster.fit(D).labels_
 
-    clusters = [[]]
-    i_clust = 0
+    return clusters_from_labels(c, cluster_labels)
 
-    for i, G in enumerate(c):
-        while i_clust < cluster_labels[i]:
-            i_clust += 1
-            clusters.append([])
-        clusters[cluster_labels[i]].append(G)
-    
-    return clusters
-
+def cluster_dbscan(c, D, eps, min_samples):
+    DBSCANCluster = DBSCAN(eps, min_samples=min_samples, metric='precomputed')
+    cluster_labels = DBSCANCluster.fit(D).labels_
+    return clusters_from_labels(c, cluster_labels)
