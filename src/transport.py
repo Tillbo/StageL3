@@ -6,6 +6,9 @@ from multiprocessing import Process, Lock, Value, Array
 
 import numpy as np
 
+from time import time
+from datetime import timedelta
+
 def node_dists(G1, G2, d):
     M = np.zeros((G1.number_of_nodes(), G2.number_of_nodes()))
 
@@ -82,14 +85,16 @@ def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100):
     return D
 
 def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100, Nprocess=7):
+    
     D = Array('d', len(class1)*len(class2))
     i = Value('i', 0)
     j = Value('i', 0)
+    N_done = Value('i', 0)
     coordinates_lock = Lock()
 
     symetric = class1 == class2 and Cs1 == Cs2 and hs1 == hs2
 
-    def f(D, i, j):
+    def f(D, i, j, N_done):
         while i.value < len(class1):
             coordinates_lock.acquire()
             i0 = i.value
@@ -98,9 +103,19 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
             if j.value >= len(class2):
                 i.value += 1
                 j.value = i.value if symetric else 0
+            ndone = N_done.value
+            N_done.value += 1
             coordinates_lock.release()
 
-            print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}              ", end="\r")
+            if ndone == 0:
+                remaining_time = "?"
+            else:
+                remaining_time = str(timedelta(seconds=((N_total_to_do-ndone)/ndone)*(time()-t_start))).split(':')
+                if remaining_time[0] == 0:
+                    remaining_time = f"{remaining_time[1]} min"
+                else:
+                    remaining_time = f"{remaining_time[0]} h {remaining_time[1]} min"
+            print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}  | Estimated Remaining Time : {remaining_time}          ", end="\r")
 
             G1 = class1[i0]
             G2 = class2[j0]
@@ -116,9 +131,11 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
 
     processes = []
     for _ in range(Nprocess):
-        p = Process(target=f, args=(D, i, j))
+        p = Process(target=f, args=(D, i, j, N_done))
         processes.append(p)
-
+    
+    N_total_to_do = len(class1)*len(class2) if not symetric else len(class1)*(len(class1)-1)/2
+    t_start = time()
     for p in processes:
         p.start()
     for p in processes:
@@ -126,4 +143,4 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
 
     D = np.array(D).reshape((len(class1), len(class2)))
     return D
-        
+

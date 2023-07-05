@@ -57,6 +57,7 @@ def transform(G : nx.Graph(), dv, de, hv, he, beta) :
             h.append(beta*hv[node_index[u]])
     
     G2.graph['smiles'] = G.graph['smiles']
+    G2.graph['index'] = G.graph['index']
 
     return G2, d, np.array(h)
 

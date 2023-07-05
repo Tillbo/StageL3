@@ -25,6 +25,8 @@ def parse(name="graphs_for_P34972", percent=1):
                 graph_attrs=['smiles'],
                 to_undirected=True
             )
+        
+        G.graph['index'] = df.index[i]
 
         if not is_connected(G):
             print(f"Graph {df.index[i]} is not connected")
