@@ -29,9 +29,7 @@ def parse(name="graphs_for_P34972", percent=1):
         if not is_connected(G):
             print(f"Graph {df.index[i]} is not connected")
             largest_cc = max(connected_components(G), key=len)
-            G = G.subgraph(largest_cc)#.copy()
-            """ draw_kamada_kawai(G)
-            plt.show() """
+            G = G.subgraph(largest_cc).copy()
 
         while label > i_class:
             classes.append([])
@@ -39,7 +37,6 @@ def parse(name="graphs_for_P34972", percent=1):
         classes[label].append(G)
     
     sampled_classes = [choice(np.array(c, dtype=type(classes[0][0])), (int(len(c)*percent),), replace=False) for c in classes]
-    
     return sampled_classes
 
 def parse_and_transform(name="graphs_for_P34972", pdv=2, pde=2, beta=0.5, Nmax=-1, percent=1):

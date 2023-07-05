@@ -1,5 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from rdkit.Chem.Draw import MolToFile
+from rdkit.Chem import MolFromSmiles
+from os import mkdir
 
 def plot(G, mapv, mape=None, title="", n=1, m=1, i=1):
     """
@@ -30,3 +33,11 @@ def plot(G, mapv, mape=None, title="", n=1, m=1, i=1):
             edge_width.append(mape[G[u][v]['edge_attr']])
     
     nx.draw_kamada_kawai(G, node_color=node_colors, labels=node_labels, width=edge_width)
+
+def save_mol_folder(Gs, folder, names):
+    try:
+        mkdir(f"save/{folder}")
+    except:
+        pass
+    for G, name in zip(Gs, names):
+        MolToFile(MolFromSmiles(G.graph['smiles']), f"save/{folder}/{name}.png")
