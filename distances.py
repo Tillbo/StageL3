@@ -1,6 +1,6 @@
 from src import *
 
-PERCENT = 0.1
+PERCENT = 0.01
 NPROCESS = 7
 SEED = 123456789
 
@@ -36,7 +36,7 @@ np.save("./save/D01.npy", D01)
 
 print("\n====== COMPUTING D02 ======\n")
 D02 = one_one_parralelised(graphs[0], graphs[2], d, C0 , C2, histos[0], histos[2], alpha=0.5, Nprocess=NPROCESS)
-np.save("./save/D02.npy", D01)
+np.save("./save/D02.npy", D02)
 
 print("\n====== COMPUTING D12 ======\n")
 D12 = one_one_parralelised(graphs[1], graphs[2], d, C1 , C2, histos[1], histos[2], alpha=0.5, Nprocess=NPROCESS)

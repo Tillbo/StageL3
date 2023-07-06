@@ -35,9 +35,14 @@ def plot(G, mapv, mape=None, title="", n=1, m=1, i=1):
     nx.draw_kamada_kawai(G, node_color=node_colors, labels=node_labels, width=edge_width)
 
 def save_mol_folder(Gs, folder, names):
-    try:
-        mkdir(f"save/{folder}")
-    except:
-        pass
+    folder_names = folder.split("/")
+    s = ""
+    for f in folder_names:
+        s += f
+        try:
+            mkdir(f"save/{s}")
+        except FileExistsError:
+            pass
+        s += "/"
     for G, name in zip(Gs, names):
         MolToFile(MolFromSmiles(G.graph['smiles']), f"save/{folder}/{name}.png")
