@@ -10,12 +10,20 @@ import numpy as np
 from .transform import transform
 from .utils import make_p_dist
 
-def parse(name="graphs_for_P34972", percent=1):
+def parse(name="graphs_for_P34972", attention=None, percent=1):
     with open(f"./data/{name}.pkl", "rb") as file:
         df = pickle.load(file)
     
+    if not (attention is None):
+        with open(f"./data/{attention}.pkl", "rb") as f:
+            att = pickle.load(f)
+    
     classes = [[]]
     i_class = 0
+    if not (attention is None):
+        attention_index = att[0][0]
+        attention_i = 0
+        
     for i, l in enumerate(df.values):
         data, label = l[0], l[1]
         G = to_networkx(
@@ -28,20 +36,41 @@ def parse(name="graphs_for_P34972", percent=1):
         
         G.graph['index'] = df.index[i]
 
+        for e in G.edges:
+            G.edges[e]['edge_attr'] = np.array(G.edges[e]['edge_attr'])
+
+        if not (attention is None) and df.index[i] == attention_index:
+            attention_g = att[attention_i][1]
+            for n, u in enumerate(G.nodes):
+                au = attention_g[0,:,n,:].flatten()
+                G.nodes[u]['x'] = np.concatenate((G.nodes[u]['x'], au))
+
+            attention_i += 1
+            if attention_i < len(att):
+                attention_index = att[attention_i][0]
+            else:
+                attention_index = -1
+        
         if not is_connected(G):
             print(f"Graph {df.index[i]} is not connected")
             largest_cc = max(connected_components(G), key=len)
             G = G.subgraph(largest_cc).copy()
 
+
         while label > i_class:
             classes.append([])
             i_class += 1
         classes[label].append(G)
-    
     sampled_classes = [choice(np.array(c, dtype=type(classes[0][0])), (int(len(c)*percent),), replace=False) for c in classes]
+
+    for k, c in enumerate(sampled_classes):
+        for i, G in enumerate(c):
+            if G.graph['index'] == 52353:
+                sampled_classes[k] = np.delete(c, i)
+
     return sampled_classes
 
-def parse_and_transform(name="graphs_for_P34972", pdv=2, pde=2, beta=0.5, Nmax=-1, percent=1):
+def parse_and_transform(name="graphs_for_P34972", attention=None, pdv=2, pde=2, beta=0.5, Nmax=-1, percent=1):
     """
     Does the same as parse but pretransforms the graphs.
 
@@ -57,7 +86,7 @@ def parse_and_transform(name="graphs_for_P34972", pdv=2, pde=2, beta=0.5, Nmax=-
         - new_histos (list of list of histograms) : list of histograms grouped by classes. new_histos[c][i] correspond to new_graph[c][i]
         - d : new distance function
     """
-    classes = parse(name, percent)
+    classes = parse(name, attention, percent)
     new_graphs = []
     new_histos = []
     for c in classes:

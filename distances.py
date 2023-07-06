@@ -1,13 +1,14 @@
 from src import *
 
-PERCENT = 0.01
+PERCENT = 0.1
 NPROCESS = 7
 SEED = 123456789
 
 np.random.seed(SEED)
 
 print("\n====== PARSING DATASET ======\n")
-graphs, histos, d = parse_and_transform(percent=PERCENT)
+
+graphs, histos, d = parse_and_transform(percent=PERCENT, attention="attentions")
 print(f"Number of classes : {len(graphs)}")
 for i, c in enumerate(graphs):
     print(f"    Class {i} : {len(graphs[i])} graphs")

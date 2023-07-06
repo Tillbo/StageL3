@@ -26,9 +26,9 @@ def transform(G : nx.Graph(), dv, de, hv, he, beta) :
     G2 = nx.Graph()
 
     def d(a, b):
-        if a[0] == RESERVED and b[0] == RESERVED:
+        if a[0] is RESERVED and b[0] is RESERVED:
             return de(a[1], b[1])
-        if a[1] == RESERVED and b[1] == RESERVED:
+        if a[1] is RESERVED and b[1] is RESERVED:
             return dv(a[0], b[0])
         return INF
  
@@ -51,7 +51,7 @@ def transform(G : nx.Graph(), dv, de, hv, he, beta) :
 
     h = []
     for u in G2.nodes:
-        if G2.nodes[u]['x'][0] == RESERVED:
+        if G2.nodes[u]['x'][0] is RESERVED:
             h.append((1-beta)*he[edge_index[u]])
         else:
             h.append(beta*hv[node_index[u]])
@@ -96,7 +96,7 @@ def inverse_transform(G : nx.Graph(), d, h):
 
     beta = 0
     for i, u in enumerate(G.nodes):
-        if G.nodes[u]['x'][0] == RESERVED:
+        if G.nodes[u]['x'][0] is RESERVED:
             #Edge
             edges.append((u[0], u[1], {'edge_attr': G.nodes[u]['x'][1]}))
             he[(u[0], u[1])] = h[i]
