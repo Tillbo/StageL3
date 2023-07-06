@@ -111,11 +111,12 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
                 remaining_time = "?"
             else:
                 remaining_time = str(timedelta(seconds=((N_total_to_do-ndone)/ndone)*(time()-t_start))).split(':')
-                if remaining_time[0] == 0:
-                    remaining_time = f"{remaining_time[1]} min"
-                else:
-                    remaining_time = f"{remaining_time[0]} h {remaining_time[1]} min"
+                remaining_time = f"{remaining_time[0]} h {remaining_time[1]} min {remaining_time[2].split('.')[0]} s"
             print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}  | Estimated Remaining Time : {remaining_time}          ", end="\r")
+
+            if symetric and i0 == j0:
+                D[i0*len(class1)+j0] = 0
+                continue
 
             G1 = class1[i0]
             G2 = class2[j0]
@@ -142,5 +143,6 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
         p.join()
 
     D = np.array(D).reshape((len(class1), len(class2)))
+    print()
     return D
 
