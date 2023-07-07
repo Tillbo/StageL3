@@ -1,4 +1,7 @@
 from sklearn.cluster import AgglomerativeClustering, DBSCAN
+from scipy.cluster.hierarchy import linkage, dendrogram
+from .utils import condense
+
 
 def clusters_from_labels(c, labels):
     clusters = [[]]
@@ -54,3 +57,16 @@ def cluster_dbscan(c, D, eps, min_samples):
     DBSCANCluster = DBSCAN(eps, min_samples=min_samples, metric='precomputed')
     cluster_labels = DBSCANCluster.fit(D).labels_
     return clusters_from_labels(c, cluster_labels)
+
+def dendo(D):
+    print("Condensing...", end=" ")
+    y = condense(D)
+    print("OK")
+    print("Linkage...", end=" ")
+    Z = linkage(y, method='weighted')
+    print("OK")
+    print(len(Z))
+    print("Plotting dendogram...", end=" ")
+    dendrogram(Z)#, truncate_mode='lastp', orientation='bottom')
+    print("OK")
+    return Z
