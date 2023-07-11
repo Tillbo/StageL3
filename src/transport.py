@@ -191,5 +191,6 @@ def one_one_parallelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
 
     #Make D into a matrix
     D = np.array(D).reshape((len(class1), len(class2)))
+    print() #Prints a new line to end the "\r"
     return D
 

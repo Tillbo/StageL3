@@ -40,7 +40,7 @@ def save_mol_folder(Gs, folder, names):
 
     Args :
     - Gs : list of graphs to save
-    - folder (string) : name of the folder on save where the molecules are saved
+    - folder (string) : name of the folder where the molecules are saved
     - names : list of names of the molecules. Will be the names of the files.
     """
     folder_names = folder.split("/")
@@ -48,9 +48,9 @@ def save_mol_folder(Gs, folder, names):
     for f in folder_names:
         s += f
         try:
-            mkdir(f"save/{s}")
+            mkdir(s)
         except FileExistsError:
             pass
         s += "/"
     for G, name in zip(Gs, names):
-        MolToFile(MolFromSmiles(G.graph['smiles']), f"save/{folder}/{name}.png")
+        MolToFile(MolFromSmiles(G.graph['smiles']), f"{folder}/{name}.png")

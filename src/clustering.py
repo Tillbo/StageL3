@@ -83,7 +83,6 @@ def dendo(D, Nclusters=2):
     print("Linkage...", end=" ", flush=True)
     Z = linkage(y, method='weighted')
     print("OK")
-    print(len(Z))
     print("Plotting dendogram...", end=" ", flush=True)
     dendrogram(Z)#, truncate_mode='lastp', orientation='bottom')
     print("OK")

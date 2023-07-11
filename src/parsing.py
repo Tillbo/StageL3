@@ -55,7 +55,6 @@ def parse(name="graphs_for_P34972", attention=None, percent=1, connected=True, s
                     data, 
                     node_attrs=['x'], 
                     edge_attrs=['edge_attr'], 
-                    graph_attrs=['smiles'],
                     to_undirected=True
                 )
         
@@ -105,7 +104,7 @@ def parse(name="graphs_for_P34972", attention=None, percent=1, connected=True, s
 
     return sampled_classes, indexes
 
-def parse_and_transform(name="graphs_for_P34972", attention=None, pdv=2, pde=2, beta=0.5, percent=1):
+def parse_and_transform(name="graphs_for_P34972", attention=None, pdv=2, pde=2, beta=0.5, percent=1, connected=True, smiles=True):
     """
     Does the same as parse but pretransforms the graphs.
 
@@ -121,7 +120,7 @@ def parse_and_transform(name="graphs_for_P34972", attention=None, pdv=2, pde=2, 
         - new_histos (list of list of histograms) : list of histograms grouped by classes. new_histos[c][i] correspond to new_graph[c][i]
         - d : new distance function
     """
-    classes, indexes = parse(name, attention, percent)
+    classes, indexes = parse(name, attention, percent, connected=connected, smiles=smiles)
     new_graphs = []
     new_histos = []
     for c in classes:
@@ -177,7 +176,7 @@ def get_espam(classes, indexes, espam="ESPAMS", choice_fun=(lambda x : x > 0), h
         new_classes.append(new_c)
     return new_classes, histos
 
-def parse_transform_espam(name="graphs_for_P34972", espam="ESPAMS", attention=None, dv=make_p_dist(2), de=make_p_dist(2), beta=0.5, percent=1, espam_histo=False, choice_fun=(lambda x : x > 0), histo_fun=(lambda v : v/np.sum(v))):
+def parse_transform_espam(name="graphs_for_P34972", espam="ESPAMS", attention=None, dv=make_p_dist(2), de=make_p_dist(2), beta=0.5, percent=1, connected=True, smiles=True, espam_histo=False, choice_fun=(lambda x : x > 0), histo_fun=(lambda v : v/np.sum(v))):
     """
     Combine parse, transform and ESPAM values.
 
@@ -192,7 +191,7 @@ def parse_transform_espam(name="graphs_for_P34972", espam="ESPAMS", attention=No
     - espam_histos (bool, default : False) : if True, then the histograms on nodes will be computed with ESPAM values. Else, histograms are uniform on nodes and on edges
     - choice_fun, histo_fun : same documentation as get_espam function
     """
-    graphs, indexes = parse(name, attention=attention, percent=percent)
+    graphs, indexes = parse(name, attention=attention, percent=percent, connected=connected, smiles=smiles)
     espam_graphs, histos = get_espam(graphs, indexes, espam, choice_fun, histo_fun)
 
     new_graphs = []

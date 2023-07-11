@@ -1,5 +1,4 @@
 from src import *
-from ot.gromov import fused_gromov_wasserstein2
 from multiprocessing import Process, Value, Array, Lock
 
 NMAX = 20
