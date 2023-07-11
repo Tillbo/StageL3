@@ -56,14 +56,14 @@ def transform(G : nx.Graph(), dv, de, hv, he, beta) :
         else:
             h.append(beta*hv[node_index[u]])
     
-    G2.graph['smiles'] = G.graph['smiles']
-    G2.graph['index'] = G.graph['index']
+    G2.graph = G2.graph
 
     return G2, d, np.array(h)
 
 def inverse_transform(G : nx.Graph(), d, h):
     """
     Process the inverse tranformation, from a node-only labeled graph to a node+edge labeled graph
+    Never used
 
     Args :
         - G (nx.Graph()) : transformed graph

@@ -1,6 +1,6 @@
 from copy import deepcopy
 from random import random, choice
-from ot.gromov import fused_gromov_wasserstein2
+from ot.gromov import fused_gromov_wasserstein2, fused_gromov_wasserstein
 
 from multiprocessing import Process, Lock, Value, Array
 
@@ -10,6 +10,14 @@ from time import time
 from datetime import timedelta
 
 def node_dists(G1, G2, d):
+    """
+    Return the matrix distance between two graphs
+
+    Args :
+    - G1 (nx.Graph) : first graph
+    - G2 (nx.Graph) : second graph
+    - d : real valued distance function
+    """
     M = np.zeros((G1.number_of_nodes(), G2.number_of_nodes()))
 
     for i, u in enumerate(G1.nodes):
@@ -18,6 +26,17 @@ def node_dists(G1, G2, d):
     return M
 
 def greedy_random_transport_plan(p, q, e=1e-10):
+    """
+    Computes a random transport plan between two distributions with a greedy method.
+
+    Args :
+    - p : source histogram
+    - q : target histogram
+    - e (float, optionnal : default = 1e-10) : threshold for ending a transport
+
+    Output :
+    - T (np.array) : transport matrix
+    """
     n = p.shape[0]
     m = q.shape[0]
     e /= n
@@ -48,17 +67,32 @@ def greedy_random_transport_plan(p, q, e=1e-10):
 
     return T
 
-def fgw(C1, C2, M, h1, h2, alpha=0.5, Niter=100, verbose=True, text=""):
+def fgw(C1, C2, M, h1, h2, alpha=0.5, Niter=100, verbose=True):
+    """
+    Compute FGW distance
 
+    Args :
+    - C1 (np.array) : first structre matrix
+    - C2 (np.array) : second structre matrix
+    - M (np.array) : distance matrix
+    - h1 (array like) : first histogram
+    - h2 (array like) : second histogram
+    - alpha (float, default : 0.5) : alpha coefficient for FGW
+    - Niter (int, default : 100) : Number of iterations starting from a greedy random transport plan
+    - verbose (boolean, default : True) : prints information about the computation (number of iteration and if a greedy transport plan is not correct)
+
+    Output : 
+    - fgw (float) : FGW distance between the two structured data
+    """
     def printv(*args, **kwargs):
         if verbose:
             print(*args, **kwargs)
 
     #First try with the "hard coded" transport plan
-    min_dist = fused_gromov_wasserstein2(M, C1, C2, h1, h2, alpha=alpha) 
+    min_dist = fused_gromov_wasserstein2(M, C1, C2, h1, h2, alpha=alpha)
     
     for i in range(Niter):
-        printv(f"{text} Iteration {i+1}/{Niter}", end="\r")
+        printv(f"Iteration {i+1}/{Niter}", end="\r")
         G0 = greedy_random_transport_plan(h1, h2)
         try:
             f = fused_gromov_wasserstein2(M, C1, C2, h1, h2, alpha=alpha, G0=G0)
@@ -69,34 +103,43 @@ def fgw(C1, C2, M, h1, h2, alpha=0.5, Niter=100, verbose=True, text=""):
             min_dist = f
     return min_dist
 
-def one_one_fgw(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100):
-    D = np.zeros((len(class1), len(class2)))
-    for i, G1 in enumerate(class1):
-        for j, G2 in enumerate(class2):
-            #print(f"i : {i+1}/{len(class1)} ------ j : {j+1}/{len(class2)}", end="\n")
-            C1 = Cs1[i]
-            C2 = Cs2[j]
-            h1 = hs1[i]
-            h2 = hs2[j]
-            M = node_dists(G1, G2, d)
-            D[i, j] = fgw(C1, C2, M, h1, h2, alpha, Niter, text=f"i : {i+1}/{len(class1)} ------ j : {j+1}/{len(class2)} => ")
-        print("\r")
-    print()
-    return D
+def one_one_parallelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100, Nprocess=7, symetric=False):
+    """
+    Computed FGW distance between graphs of class1 and graphs of class2
+    Use multiprocessing parallelization
 
-def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100, Nprocess=7):
-    
+    Args :
+    - class1 : list of graphs from class 1
+    - class2 : list of graphs from class 2
+    - d : distance function
+    - Cs1 : list of structure matrixes of graphs of class1
+    - Cs2 : list of structure matrixes of graphs of class2
+    - hs1 : histograms of graphs of class1
+    - hs2 : histograms of graphs of class2
+    - alpha (float, default : 0.5) : alpha coefficient for FGW
+    - Niter (int, default : 100) : number of iterations for computing FGW
+    - Nprocess (int, default : 7) : number of processes to use
+    - symetric (default : False) : if True, assumes class1 = class2, hs1 = hs2 and Cs1 = Cs2 and only compute half of the distances and makes the matrix symetric. There is no check.
+    """
     D = Array('d', len(class1)*len(class2))
     i = Value('i', 0)
     j = Value('i', 0)
     N_done = Value('i', 0)
     coordinates_lock = Lock()
 
-    symetric = class1 == class2 and Cs1 == Cs2 and hs1 == hs2
-
     def f(D, i, j, N_done):
+        """
+        Function that will be used by each process
+        Args :
+        - D : shared array for one to one distance matrix
+        - i : shared int for i coordinate
+        - j : share int for j coordinate
+        - N_done : shared int for keeping track of number of computations that have been performed
+        """
         while i.value < len(class1):
             coordinates_lock.acquire()
+            # Protected zone
+            # ==============
             i0 = i.value
             j0 = j.value
             j.value += 1
@@ -105,14 +148,17 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
                 j.value = i.value if symetric else 0
             ndone = N_done.value
             N_done.value += 1
+            # ======================
+            # End of protected zone
             coordinates_lock.release()
 
+            #Prints information about the computation
             if ndone == 0:
                 remaining_time = "?"
             else:
                 remaining_time = str(timedelta(seconds=((N_total_to_do-ndone)/ndone)*(time()-t_start))).split(':')
                 remaining_time = f"{remaining_time[0]} h {remaining_time[1]} min {remaining_time[2].split('.')[0]} s"
-            print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}  | Estimated Remaining Time : {remaining_time}          ", end="\r")
+            print(f"i : {i0+1}/{len(class1)} --- j : {j0+1}/{len(class2)}  | ETA : {remaining_time}                   ", end="\r")
 
             if symetric and i0 == j0:
                 D[i0*len(class1)+j0] = 0
@@ -135,6 +181,7 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
         p = Process(target=f, args=(D, i, j, N_done))
         processes.append(p)
     
+    #Number of computations to perform. Only usefull for computing ETA
     N_total_to_do = len(class1)*len(class2) if not symetric else len(class1)*(len(class1)-1)/2
     t_start = time()
     for p in processes:
@@ -142,7 +189,7 @@ def one_one_parralelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
     for p in processes:
         p.join()
 
+    #Make D into a matrix
     D = np.array(D).reshape((len(class1), len(class2)))
-    print()
     return D
 

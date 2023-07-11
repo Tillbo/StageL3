@@ -35,6 +35,14 @@ def plot(G, mapv, mape=None, title="", n=1, m=1, i=1):
     nx.draw_kamada_kawai(G, node_color=node_colors, labels=node_labels, width=edge_width)
 
 def save_mol_folder(Gs, folder, names):
+    """
+    Save molecules drawings on ./save/{folder}.
+
+    Args :
+    - Gs : list of graphs to save
+    - folder (string) : name of the folder on save where the molecules are saved
+    - names : list of names of the molecules. Will be the names of the files.
+    """
     folder_names = folder.split("/")
     s = ""
     for f in folder_names:
