@@ -1,6 +1,6 @@
 from copy import deepcopy
 from random import random, choice
-from ot.gromov import fused_gromov_wasserstein2, fused_gromov_wasserstein
+from ot.gromov import fused_gromov_wasserstein2
 
 from multiprocessing import Process, Lock, Value, Array
 
@@ -83,25 +83,28 @@ def fgw(C1, C2, M, h1, h2, alpha=0.5, Niter=100, verbose=True):
 
     Output : 
     - fgw (float) : FGW distance between the two structured data
+    - Tmin (np.array) : optimal coupling between the two structured data
     """
     def printv(*args, **kwargs):
         if verbose:
             print(*args, **kwargs)
 
     #First try with the "hard coded" transport plan
-    min_dist = fused_gromov_wasserstein2(M, C1, C2, h1, h2, alpha=alpha)
+    min_dist, log = fused_gromov_wasserstein2(M, C1, C2, h1, h2, alpha=alpha, log=True)
+    Tmin = log['T']
     
     for i in range(Niter):
         printv(f"Iteration {i+1}/{Niter}", end="\r")
         G0 = greedy_random_transport_plan(h1, h2)
         try:
-            f = fused_gromov_wasserstein2(M, C1, C2, h1, h2, alpha=alpha, G0=G0)
+            f, log = fused_gromov_wasserstein2(M, C1, C2, h1, h2, alpha=alpha, G0=G0, log=True)
         except AssertionError:
             printv("A greedy generated transport plan was not exact")
             continue
         if (f < min_dist or min_dist < 0) and f >= 0:
             min_dist = f
-    return min_dist
+            Tmin = log['T']
+    return min_dist, Tmin
 
 def one_one_parallelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter=100, Nprocess=7, symetric=False):
     """
@@ -171,7 +174,7 @@ def one_one_parallelised(class1, class2, d, Cs1, Cs2, hs1, hs2, alpha=0.5, Niter
             h1 = hs1[i0]
             h2 = hs2[j0]
             M = node_dists(G1, G2, d)
-            f = fgw(C1, C2, M, h1, h2, alpha, Niter, verbose=False)
+            f, _ = fgw(C1, C2, M, h1, h2, alpha, Niter, verbose=False)
             D[i0*len(class2)+j0] = f
             if symetric:
                 D[j0*len(class2)+i0] = f
