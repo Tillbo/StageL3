@@ -1,4 +1,4 @@
-# Organiztion
+# Organization
 - `data` folder : where datasets must be stored
 - `save` folder : where results are stored
 - `src` folder : code
@@ -42,10 +42,10 @@ Different arguments are present in .config file. DO NOT REMOVE THEM
 
 ## Different programs files
 ### distances.py
-Computes the distances matrixes for 3 classes
+Computes the distances matrixes
 
 ### counterfactuals.py
-Computes the counterfactuals for 3 classes. Distances must be computed first
+Computes the counterfactuals. Distances must be computed first
 
 ### clustering.py
-Computes clusters for 3 classes. Distances must be computed first
+Computes clusters. Distances must be computed first

@@ -14,6 +14,16 @@ def make_p_dist(p=2):
         return np.linalg.norm(v1-v2, ord=p)
     return d
 
+def unif_dist(d=1):
+    """
+    Returns a distance function such as d(x, y) = 0 if x == y, else d
+    """
+    def f(x, y):
+        if type(x) is np.ndarray and type(y) is np.ndarray:
+            return 0 if np.all(x == y) else d
+        return 0 if x == y else d
+    return f
+
 def condense(D):
     """
     Condense a distance matrix within a set into a vector. Usefull for scipy's clustering

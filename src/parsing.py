@@ -8,7 +8,7 @@ from numpy.random import choice
 import numpy as np
 
 from .transform import transform
-from .utils import make_p_dist
+from .utils import make_p_dist, unif_dist
 
 def parse(name="graphs_for_P34972", attention=None, percent=1, connected=True, smiles=True):
     """
@@ -104,7 +104,7 @@ def parse(name="graphs_for_P34972", attention=None, percent=1, connected=True, s
 
     return sampled_classes, indexes
 
-def parse_and_transform(name="graphs_for_P34972", attention=None, pdv=2, pde=2, beta=0.5, percent=1, connected=True, smiles=True):
+def parse_and_transform(name="graphs_for_P34972", attention=None, dv=unif_dist(1), de=unif_dist(1), beta=0.5, percent=1, connected=True, smiles=True):
     """
     Does the same as parse but pretransforms the graphs.
 
@@ -127,8 +127,6 @@ def parse_and_transform(name="graphs_for_P34972", attention=None, pdv=2, pde=2, 
         graphs = []
         histo = []
         for G in c:
-            dv = make_p_dist(pdv)
-            de = make_p_dist(pde)
             hv = unif(G.number_of_nodes())
             he = unif(G.number_of_edges())
             G2, d, h = transform(G, dv, de, hv, he, beta)
@@ -176,7 +174,7 @@ def get_espam(classes, indexes, espam="ESPAMS", choice_fun=(lambda x : x > 0), h
         new_classes.append(new_c)
     return new_classes, histos
 
-def parse_transform_espam(name="graphs_for_P34972", espam="ESPAMS", attention=None, dv=make_p_dist(2), de=make_p_dist(2), beta=0.5, percent=1, connected=True, smiles=True, espam_histo=False, choice_fun=(lambda x : x > 0), histo_fun=(lambda v : v/np.sum(v))):
+def parse_transform_espam(name="graphs_for_P34972", espam="ESPAMS", attention=None, dv=unif_dist(1), de=unif_dist(1), beta=0.5, percent=1, connected=True, smiles=True, espam_histo=False, choice_fun=(lambda x : x > 0), histo_fun=(lambda v : v/np.sum(v))):
     """
     Combine parse, transform and ESPAM values.
 
